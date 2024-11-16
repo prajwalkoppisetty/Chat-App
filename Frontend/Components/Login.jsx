@@ -1,10 +1,11 @@
 // src/components/Login.jsx
 import React, { useState } from 'react';
-import { Container, TextField, Button, Typography, Box, Paper, Avatar, IconButton, InputAdornment } from '@mui/material';
+import { Container, TextField, Button, Typography, Box, Paper, Avatar, IconButton, InputAdornment, Link } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';  // Import useNavigate for redirection
 import logo from '../Assets/Logo.png';
-import './Styles.css'
+import './Styles.css';
 
 const theme = createTheme({
   palette: {
@@ -32,6 +33,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();  // Initialize the useNavigate hook
 
   const validateForm = () => {
     const newErrors = {};
@@ -45,6 +47,7 @@ const Login = () => {
   const handleLogin = () => {
     if (validateForm()) {
       console.log('User logged in:', { username, password });
+      navigate('/');  // Redirect to home route after successful login
     }
   };
 
@@ -121,6 +124,12 @@ const Login = () => {
               >
                 Login
               </Button>
+              <Typography variant="body2" color="text.secondary" align="center">
+                Don't have an account?{' '}
+                <Link component={RouterLink} to="/signup" variant="body2" color="primary">
+                  Sign Up
+                </Link>
+              </Typography>
             </Box>
           </Box>
         </Paper>
