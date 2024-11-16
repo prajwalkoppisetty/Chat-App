@@ -1,10 +1,10 @@
-// src/components/Signup.jsx
 import React, { useState } from 'react';
 import { Container, TextField, Button, Typography, Box, Paper, Avatar, IconButton, InputAdornment, Link } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import logo from '../Assets/Logo.png';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import axios from 'axios';  // Import axios
 import './Styles.css';
 
 const theme = createTheme({
@@ -37,6 +37,7 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [profilePicture, setProfilePicture] = useState(null);
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const validatePassword = (password) => {
     const minLength = 5;
@@ -63,10 +64,35 @@ const Signup = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (validateForm()) {
       const userProfilePicture = profilePicture || '/images/guest.png';
-      console.log('User signed up:', { profileName, username, phone, email, password, userProfilePicture });
+
+      // Send data to backend
+      try {
+        const response = await axios.post('http://localhost:5000/signup', {
+          profileName,
+          username,
+          phone,
+          email,
+          password,
+          profilePicture: userProfilePicture,
+        });
+
+        if (response.status === 201) {
+          // Successful signup
+          console.log('User  signed up:', response.data);
+          // Redirect to login page
+          navigate('/login');
+        } else {
+          // Handle errors or unsuccessful signup
+          console.error('Signup failed:', response.data);
+          setErrors({ ...errors, server: response.data.message });
+        }
+      } catch (error) {
+        console.error('Error during signup:', error);
+        setErrors({ ...errors, server: 'An error occurred. Please try again.' });
+      }
     }
   };
 
@@ -89,139 +115,86 @@ const Signup = () => {
             <Typography component="h1" variant="h5" color="text.primary" sx={{ mb: 2 }}>
               Sign Up
             </Typography>
-            <Avatar alt="Profile Picture" src={profilePicture || '/images/guest.png'} sx={{ width: 100, height: 100, mb: 1 }} />
-            <input
-              accept="image/*"
-              style={{ display: 'none' }}
-              id="profile-picture"
-              type="file"
-              onChange={handleProfilePictureChange}
-            />
-            <label htmlFor="profile-picture">
-              <Button
-                variant="contained"
-                component="span"
-                sx={{
-                  backgroundColor: theme.palette.button.main,
-                  '&:hover': {
-                    backgroundColor: theme.palette.button.hover,
-                  },
-                  size: 'small',
-                }}
-              >
-                Upload Picture
-              </Button>
+            <Avatar alt=" User " src={profilePicture} sx={{ width: 56, height: 56, mb: 2 }} />
+            <input type="file" accept="image/*" onChange={handleProfilePictureChange} style={{ display: 'none' }} id="profile-picture-upload" />
+            <label htmlFor="profile-picture-upload">
+              <IconButton component="span" color="primary">
+                <Visibility />
+              </IconButton>
             </label>
-            <Box component="form" noValidate sx={{ mt: 3, width: '100%' }}>
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                id="profileName"
-                label="Profile Name"
-                name="profileName"
-                autoComplete="profile-name"
-                autoFocus
-                value={profileName}
-                onChange={(e) => setProfileName(e.target.value)}
-                error={!!errors.profileName}
-                helperText={errors.profileName}
-              />
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                id="username"
-                label="Username"
-                name="username"
-                autoComplete="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                error={!!errors.username}
-                helperText={errors.username}
-              />
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                id="phone"
-                label="Phone Number"
-                name="phone"
-                autoComplete="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                error={!!errors.phone}
-                helperText={errors.phone}
-              />
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                error={!!errors.email}
-                helperText={errors.email}
-              />
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type={showPassword ? 'text' : 'password'}
-                id="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                error={!!errors.password}
-                helperText={errors.password}
-              />
-              <Button
-                type="button"
-                fullWidth
-                variant="contained"
-                color="primary"
-                sx={{
-                  mt: 3,
-                  mb: 2,
-                  backgroundColor: theme.palette.primary.main,
-                  '&:hover': {
-                    backgroundColor: theme.palette.secondary.main,
-                  },
-                }}
-                onClick={handleSignup}
-              >
-                Sign Up
-              </Button>
-              <Typography variant="body2" color="text.secondary" align="center">
-                Already have an account?{' '}
-                <Link component={RouterLink} to="/login" variant="body2" color="primary">
-                  Login
-                </Link>
-              </Typography>
-            </Box>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Profile Name"
+              value={profileName}
+              onChange={(e) => setProfileName(e.target.value)}
+              error={!!errors.profileName}
+              helperText={errors.profileName}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              error={!!errors.username}
+              helperText={errors.username}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Phone Number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              error={!!errors.phone}
+              helperText={errors.phone}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={!!errors.email}
+              helperText={errors.email}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={!!errors.password}
+              helperText={errors.password}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={handleClickShowPassword}>
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            {errors.server && <Typography color="error">{errors.server}</Typography>}
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={handleSignup}
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Sign Up
+            </Button>
+            <Link component={RouterLink} to="/login" variant="body2">
+              Already have an account? Sign In
+            </Link>
           </Box>
         </Paper>
       </Container>

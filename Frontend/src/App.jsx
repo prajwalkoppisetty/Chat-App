@@ -30,7 +30,7 @@ function App() {
       {!isLoginOrSignup && (
         <Box sx={{ position: 'fixed', top: 10, right: 10 }}>
           <IconButton onClick={handleClick}>
-            <Avatar sx={{ width: 40, height: 40 }}>G</Avatar> {/* Default Guest Avatar */}
+            <Avatar sx={{ width: 40, height: 40, border: '2px solid #2196f3'}}></Avatar> {/* Default Guest Avatar */}
           </IconButton>
           <Menu
             anchorEl={anchorEl}
