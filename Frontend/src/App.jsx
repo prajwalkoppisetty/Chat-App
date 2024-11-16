@@ -5,6 +5,7 @@ import './index.css';
 import Signup from './../Components/Signup';
 import Login from './../Components/Login';
 import HomePage from '../Components/HomePage';
+import BottomNav from '../Components/Bottomnav';
 function App() {
   return (
     <Router>
@@ -13,6 +14,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<HomePage />} />
       </Routes>
+      <BottomNav/>
     </Router>
   );
 }
