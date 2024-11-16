@@ -43,9 +43,7 @@ const Login = () => {
   };
 
   const handleLogin = () => {
-    if (validateForm()) {
-      console.log('User logged in:', { username, password });
-    }
+     console.log("logged in ")
   };
 
   const handleClickShowPassword = () => {
@@ -117,7 +115,9 @@ const Login = () => {
                     backgroundColor: theme.palette.secondary.main,
                   },
                 }}
-                onClick={handleLogin}
+                onClick={()=>{
+                  console.log("login performed")
+                }}
               >
                 Login
               </Button>
