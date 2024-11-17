@@ -2,7 +2,6 @@
 const express = require('express'); // Web framework for building APIs
 const cors = require('cors'); // Middleware to enable CORS
 const mongoose = require('mongoose'); // MongoDB object modeling tool
-const bcrypt = require('bcrypt'); // Library to hash passwords
 const User = require('./models/UserSchema'); // Import the User model
 
 // Create an instance of Express
@@ -37,33 +36,58 @@ app.post('/signup', async (req, res) => {
 
     try {
         // Check if the user already exists
-        const existingUser  = await User.findOne({ $or: [{ username }, { phone }, { email }] });
-        if (existingUser ) {
-            return res.status(400).json({ message: 'User  already exists' });
+        const existingUser = await User.findOne({ $or: [{ username }, { phone }, { email }] });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Hash the password
-        
-
         // Create a new user
-        const newUser  = new User({
+        const newUser = new User({
             profileName,
             username,
             phone,
             email,
-            password,
+            password, // Store the password as plain text for now (not recommended in production)
             profilePicture: profilePicture || '/images/guest.png', // Default profile picture
         });
 
         // Save the user to the database
-        await newUser .save();
+        await newUser.save();
 
         // Respond with success message
-        res.status(201).json({ message: 'User  registered successfully' });
+        res.status(201).json({ message: 'User registered successfully' });
     } catch (error) {
         console.error("Error during signup:", error);
         res.status(500).json({ message: 'Internal server error' });
     }
+});
+
+// Login route
+app.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+
+    // Basic validation
+    if (!username || !password) {
+        return res.status(400).json({ message: 'Username and password are required' });
+    }
+
+    try {
+        // Find the user by username
+        const user = await User.findOne({ username });
+        if (!user || user.password !== password) {
+            return res.status(401).json({ message: 'Invalid username or password' });
+        }
+
+        // Successful login
+        res.status(200).json({ message: 'Login successful', user: { username: user.username } });
+    } catch (error) {
+        console.error("Error during login:", error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+app.get('/', (req, res) => {
+    res.send('Chat Matrix Server Page');
 });
 
 // Start the server

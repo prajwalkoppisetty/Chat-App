@@ -1,9 +1,21 @@
 // src/components/Login.jsx
 import React, { useState } from 'react';
-import { Container, TextField, Button, Typography, Box, Paper, Avatar, IconButton, InputAdornment, Link } from '@mui/material';
+import {
+  Container,
+  TextField,
+  Button,
+  Typography,
+  Box,
+  Paper,
+  Avatar,
+  IconButton,
+  InputAdornment,
+  Link,
+} from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';  // Import useNavigate for redirection
+import { Link as RouterLink, useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
+import axios from 'axios'; // Import Axios for API calls
 import logo from '../Assets/Logo.png';
 import './Styles.css';
 
@@ -33,7 +45,8 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
-  const navigate = useNavigate();  // Initialize the useNavigate hook
+  const [serverError, setServerError] = useState('');
+  const navigate = useNavigate(); // Initialize the useNavigate hook
 
   const validateForm = () => {
     const newErrors = {};
@@ -44,10 +57,28 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (validateForm()) {
-      console.log('User logged in:', { username, password });
-      navigate('/');  // Redirect to home route after successful login
+      try {
+        const response = await axios.post('http://localhost:5000/login', {
+          username,
+          password,
+        });
+
+        // If login is successful
+        if (response.status === 200) {
+          console.log('User logged in:', response.data);
+          // Redirect to home route after successful login
+          navigate('/');
+        }
+      } catch (error) {
+        // Handle server errors
+        if (error.response && error.response.data) {
+          setServerError(error.response.data.message);
+        } else {
+          setServerError('An error occurred. Please try again.');
+        }
+      }
     }
   };
 
@@ -64,6 +95,11 @@ const Login = () => {
             <Typography component="h1" variant="h5" color="text.primary" sx={{ mb: 2 }}>
               Login
             </Typography>
+            {serverError && (
+              <Typography color="error" sx={{ mb: 2 }}>
+                {serverError}
+              </Typography>
+            )}
             <Box component="form" noValidate sx={{ mt: 3, width: '100%' }}>
               <TextField
                 variant="outlined"
